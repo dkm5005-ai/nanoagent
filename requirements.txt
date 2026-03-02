@@ -1,0 +1,27 @@
+# NanoAgent - Python AI Assistant for Raspberry Pi Zero 2W + Whisplay HAT
+# Core dependencies
+
+# LLM Providers
+anthropic>=0.40.0
+openai>=1.50.0
+httpx>=0.27.0
+
+# Configuration & Validation
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Async Support
+aiofiles>=24.1.0
+
+# Image Processing (for LCD display)
+Pillow>=10.0.0
+
+# Hardware (Raspberry Pi) - optional, only needed on Pi
+# spidev>=3.6
+# RPi.GPIO>=0.7.1
+
+# Web scraping (for web_fetch tool)
+beautifulsoup4>=4.12.0
+
+# DuckDuckGo search
+duckduckgo-search>=6.0.0

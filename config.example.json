@@ -1,0 +1,103 @@
+{
+  "workspace": "~/.nanoagent/workspace",
+
+  "providers": {
+    "anthropic": {
+      "api_key": "sk-ant-your-key-here"
+    },
+    "openai": {
+      "api_key": "sk-your-key-here"
+    },
+    "openrouter": {
+      "api_key": "sk-or-your-key-here",
+      "api_base": "https://openrouter.ai/api/v1"
+    }
+  },
+
+  "models": [
+    {
+      "name": "claude",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514",
+      "max_tokens": 4096,
+      "temperature": 0.7
+    },
+    {
+      "name": "gpt4",
+      "provider": "openai",
+      "model": "gpt-4o",
+      "max_tokens": 4096,
+      "temperature": 0.7
+    },
+    {
+      "name": "gpt4-mini",
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "max_tokens": 4096,
+      "temperature": 0.7
+    },
+    {
+      "name": "deepseek",
+      "provider": "openrouter",
+      "model": "deepseek/deepseek-chat",
+      "max_tokens": 4096,
+      "temperature": 0.7
+    }
+  ],
+
+  "default_model": "claude",
+
+  "voice": {
+    "enabled": true,
+    "stt_provider": "openai",
+    "stt_model": "whisper-1",
+    "tts_enabled": true,
+    "tts_provider": "openai",
+    "tts_model": "tts-1",
+    "tts_voice": "alloy",
+    "sample_rate": 48000,
+    "channels": 2
+  },
+
+  "tools": {
+    "enabled": [
+      "read_file",
+      "write_file",
+      "edit_file",
+      "list_dir",
+      "exec",
+      "web_search",
+      "web_fetch"
+    ],
+    "shell_deny_patterns": [
+      "rm -rf /",
+      "rm -rf /*",
+      "mkfs",
+      "dd if=",
+      ":(){:|:&};:",
+      "chmod -R 777 /",
+      "shutdown",
+      "reboot"
+    ],
+    "restrict_to_workspace": true
+  },
+
+  "hardware": {
+    "enabled": true,
+    "driver_path": null,
+    "lcd_width": 240,
+    "lcd_height": 280,
+    "backlight_brightness": 60,
+    "led_idle_color": [0, 0, 255],
+    "led_listening_color": [255, 0, 0],
+    "led_thinking_color": [255, 255, 0],
+    "led_speaking_color": [0, 255, 0],
+    "audio_card": "wm8960soundcard"
+  },
+
+  "agent": {
+    "max_tool_iterations": 20,
+    "max_history_messages": 50,
+    "system_prompt_cache": true
+  }
+}
