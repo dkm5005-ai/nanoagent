@@ -146,7 +146,7 @@ class DisplayRenderer:
         status: str,
         icon: str | None = None,
         bg_color: Tuple[int, int, int] = (0, 0, 0),
-    ) -> bytes:
+    ) -> list:
         """
         Render a status screen.
 
@@ -156,7 +156,7 @@ class DisplayRenderer:
             bg_color: Background color
 
         Returns:
-            RGB565 pixel data as bytes
+            RGB565 pixel data as list
         """
         return self.render_text(
             text=status,
@@ -165,6 +165,91 @@ class DisplayRenderer:
             text_color=(255, 255, 255),
             font_size=28,
         )
+
+    def render_smiley(
+        self,
+        text: str = "Ready",
+        eyes_open: bool = True,
+        bg_color: Tuple[int, int, int] = (20, 20, 40),
+    ) -> list:
+        """
+        Render a smiley face with text above it.
+
+        Args:
+            text: Text to display above the smiley
+            eyes_open: Whether eyes are open (for blinking animation)
+            bg_color: Background color
+
+        Returns:
+            RGB565 pixel data as list
+        """
+        if not self._pil_available:
+            return self._solid_color_pixels(rgb_to_rgb565(*bg_color))
+
+        img = self._Image.new("RGB", (self.width, self.height), bg_color)
+        draw = self._ImageDraw.Draw(img)
+
+        # Draw "Ready" text at top
+        font = self._get_font(28)
+        if font:
+            bbox = draw.textbbox((0, 0), text, font=font)
+            tw = bbox[2] - bbox[0]
+            x = (self.width - tw) // 2
+            draw.text((x, 30), text, fill=(255, 255, 255), font=font)
+
+        # Smiley face parameters
+        face_cx, face_cy = self.width // 2, 160  # Center of face
+        face_radius = 60
+
+        # Draw face circle (yellow)
+        face_color = (255, 220, 80)
+        draw.ellipse(
+            [face_cx - face_radius, face_cy - face_radius,
+             face_cx + face_radius, face_cy + face_radius],
+            fill=face_color,
+            outline=(200, 170, 50),
+            width=3
+        )
+
+        # Draw eyes
+        eye_y = face_cy - 15
+        left_eye_x = face_cx - 22
+        right_eye_x = face_cx + 22
+        eye_color = (40, 40, 40)
+
+        if eyes_open:
+            # Open eyes - circles
+            eye_radius = 8
+            draw.ellipse(
+                [left_eye_x - eye_radius, eye_y - eye_radius,
+                 left_eye_x + eye_radius, eye_y + eye_radius],
+                fill=eye_color
+            )
+            draw.ellipse(
+                [right_eye_x - eye_radius, eye_y - eye_radius,
+                 right_eye_x + eye_radius, eye_y + eye_radius],
+                fill=eye_color
+            )
+        else:
+            # Closed eyes - horizontal lines
+            draw.line(
+                [left_eye_x - 10, eye_y, left_eye_x + 10, eye_y],
+                fill=eye_color, width=4
+            )
+            draw.line(
+                [right_eye_x - 10, eye_y, right_eye_x + 10, eye_y],
+                fill=eye_color, width=4
+            )
+
+        # Draw smile (arc)
+        smile_y = face_cy + 5
+        draw.arc(
+            [face_cx - 35, smile_y - 15, face_cx + 35, smile_y + 25],
+            start=0, end=180,
+            fill=(40, 40, 40), width=4
+        )
+
+        return self._image_to_rgb565(img)
 
     def render_conversation(
         self,

@@ -96,9 +96,59 @@ class VoiceAssistant:
         self._recording_path = Path(tempfile.gettempdir()) / "nanoagent" / "recording.wav"
         self._response_text = ""
 
+        # Smiley animation state
+        self._smiley_thread: threading.Thread | None = None
+        self._smiley_running = False
+        self._eyes_open = True
+
         # Setup button callbacks
         self.device.on_button_press(self._on_button_press)
         self.device.on_button_release(self._on_button_release)
+
+    def _start_smiley_animation(self) -> None:
+        """Start the smiley face blinking animation"""
+        self._stop_smiley_animation()
+        self._smiley_running = True
+        self._eyes_open = True
+        self._smiley_thread = threading.Thread(
+            target=self._smiley_animation_loop,
+            daemon=True,
+        )
+        self._smiley_thread.start()
+
+    def _stop_smiley_animation(self) -> None:
+        """Stop the smiley animation"""
+        self._smiley_running = False
+        if self._smiley_thread and self._smiley_thread.is_alive():
+            self._smiley_thread.join(timeout=0.5)
+        self._smiley_thread = None
+
+    def _smiley_animation_loop(self) -> None:
+        """Smiley blinking animation loop"""
+        import time
+        blink_interval = 1.0  # Blink every 1 second
+        blink_duration = 0.15  # Eyes closed for 150ms
+
+        last_blink = time.time()
+        while self._smiley_running:
+            now = time.time()
+
+            # Check if it's time to blink
+            if now - last_blink >= blink_interval:
+                # Close eyes
+                self._eyes_open = False
+                pixels = self.renderer.render_smiley("Ready", eyes_open=False)
+                self.device.draw_image(0, 0, 240, 280, pixels)
+                time.sleep(blink_duration)
+
+                # Open eyes
+                if self._smiley_running:
+                    self._eyes_open = True
+                    pixels = self.renderer.render_smiley("Ready", eyes_open=True)
+                    self.device.draw_image(0, 0, 240, 280, pixels)
+                last_blink = time.time()
+
+            time.sleep(0.1)
 
     def _set_state(self, new_state: State, update_display: bool = True) -> None:
         """Update state with LED and display feedback"""
@@ -110,25 +160,32 @@ class VoiceAssistant:
         if new_state == State.IDLE:
             self.device.led_breathing(*hw.led_idle_color)
             if update_display:
-                pixels = self.renderer.render_status("Ready", bg_color=(20, 20, 40))
-                self.device.draw_image(0, 0, 240, 280, pixels)
+                # Start smiley animation
+                self._start_smiley_animation()
+            else:
+                # Just stop animation but keep current display
+                self._stop_smiley_animation()
 
         elif new_state == State.LISTENING:
+            self._stop_smiley_animation()
             self.device.set_led(*hw.led_listening_color)
             pixels = self.renderer.render_status("Listening...", bg_color=(40, 20, 20))
             self.device.draw_image(0, 0, 240, 280, pixels)
 
         elif new_state == State.PROCESSING:
+            self._stop_smiley_animation()
             self.device.led_blink(*hw.led_thinking_color)
             pixels = self.renderer.render_status("Processing...", bg_color=(40, 40, 20))
             self.device.draw_image(0, 0, 240, 280, pixels)
 
         elif new_state == State.THINKING:
+            self._stop_smiley_animation()
             self.device.led_blink(*hw.led_thinking_color)
             pixels = self.renderer.render_status("Thinking...", bg_color=(40, 40, 20))
             self.device.draw_image(0, 0, 240, 280, pixels)
 
         elif new_state == State.SPEAKING:
+            self._stop_smiley_animation()
             self.device.set_led(*hw.led_speaking_color)
             # Display will be updated with response text
 
@@ -229,6 +286,7 @@ class VoiceAssistant:
     def shutdown(self) -> None:
         """Clean shutdown"""
         self._running = False
+        self._stop_smiley_animation()
         self.device.cleanup()
         logger.info("Voice assistant stopped.")
 
