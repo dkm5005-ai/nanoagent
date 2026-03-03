@@ -114,7 +114,7 @@ def create_default_registry(
     )
     from .shell import ShellTool
     from .web import WebSearchTool, WebFetchTool
-    from .wifi import WifiStatusTool, WifiScanTool, WifiSpeedTestTool
+    from .wifi import WifiStatusTool, WifiScanTool, WifiChannelAnalysisTool, WifiSpeedTestTool
 
     registry = ToolRegistry()
 
@@ -139,6 +139,7 @@ def create_default_registry(
     # WiFi tools
     registry.register(WifiStatusTool())
     registry.register(WifiScanTool())
+    registry.register(WifiChannelAnalysisTool())
     registry.register(WifiSpeedTestTool())
 
     return registry
