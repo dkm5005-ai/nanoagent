@@ -272,26 +272,23 @@ class DisplayRenderer:
 
         return img
 
-    def _image_to_rgb565(self, img) -> bytes:
-        """Convert PIL Image to RGB565 bytes"""
-        pixels = bytearray(self.width * self.height * 2)
-        idx = 0
+    def _image_to_rgb565(self, img) -> list:
+        """Convert PIL Image to RGB565 list (for Whisplay driver compatibility)"""
+        pixels = []
 
         for y in range(self.height):
             for x in range(self.width):
                 r, g, b = img.getpixel((x, y))
                 rgb565 = rgb_to_rgb565(r, g, b)
-                pixels[idx] = (rgb565 >> 8) & 0xFF
-                pixels[idx + 1] = rgb565 & 0xFF
-                idx += 2
+                pixels.extend([(rgb565 >> 8) & 0xFF, rgb565 & 0xFF])
 
-        return bytes(pixels)
+        return pixels
 
-    def _solid_color_pixels(self, color: int) -> bytes:
+    def _solid_color_pixels(self, color: int) -> list:
         """Generate solid color pixel data"""
         high = (color >> 8) & 0xFF
         low = color & 0xFF
-        return bytes([high, low] * (self.width * self.height))
+        return [high, low] * (self.width * self.height)
 
     def _wrap_text(self, text: str, font, max_width: int) -> list[str]:
         """Wrap text to fit within max_width"""
