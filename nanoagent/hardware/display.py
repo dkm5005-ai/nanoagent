@@ -183,7 +183,11 @@ class DisplayRenderer:
         Returns:
             RGB565 pixel data as bytes
         """
+        logger.debug(f"render_conversation: PIL available={self._pil_available}")
+        logger.debug(f"render_conversation: user='{user_text[:50]}...', assistant='{assistant_text[:50]}...'")
+
         if not self._pil_available:
+            logger.warning("PIL not available, returning solid color")
             return self._solid_color_pixels(rgb_to_rgb565(*bg_color))
 
         img = self._Image.new("RGB", (self.width, self.height), bg_color)
@@ -220,7 +224,9 @@ class DisplayRenderer:
             draw.text((padding, y), line, fill=(255, 255, 255), font=font)
             y += 18
 
-        return self._image_to_rgb565(img)
+        pixels = self._image_to_rgb565(img)
+        logger.debug(f"render_conversation: generated {len(pixels)} bytes")
+        return pixels
 
     def load_image(self, image_path: str | Path) -> bytes:
         """

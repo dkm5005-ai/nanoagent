@@ -186,7 +186,9 @@ class VoiceAssistant:
                 self._set_state(State.SPEAKING)
 
                 # Update display with response
+                logger.debug("Rendering conversation to display")
                 pixels = self.renderer.render_conversation(user_text, response)
+                logger.debug(f"Drawing {len(pixels)} bytes to display")
                 self.device.draw_image(0, 0, 240, 280, pixels)
 
                 # Synthesize and play audio
