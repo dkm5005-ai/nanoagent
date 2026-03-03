@@ -249,6 +249,15 @@ class DisplayRenderer:
             fill=(40, 40, 40), width=4
         )
 
+        # Draw "created by Dileep" at bottom
+        small_font = self._get_font(12)
+        credit_text = "created by Dileep"
+        if small_font:
+            bbox = draw.textbbox((0, 0), credit_text, font=small_font)
+            tw = bbox[2] - bbox[0]
+            x = (self.width - tw) // 2
+            draw.text((x, self.height - 25), credit_text, fill=(120, 120, 140), font=small_font)
+
         return self._image_to_rgb565(img)
 
     def render_conversation(
