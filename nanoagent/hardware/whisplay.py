@@ -279,8 +279,8 @@ class WhisplayDevice:
             # Output routing
             ["amixer", "-c", card, "sset", "Left Output Mixer PCM", "on"],
             ["amixer", "-c", card, "sset", "Right Output Mixer PCM", "on"],
-            ["amixer", "-c", card, "sset", "Speaker", "121"],
-            ["amixer", "-c", card, "sset", "Playback", "230"],
+            ["amixer", "-c", card, "sset", "Speaker", "127"],  # Max volume
+            ["amixer", "-c", card, "sset", "Playback", "255"],  # Max volume
             # Input routing
             ["amixer", "-c", card, "sset", "Left Input Mixer Boost", "on"],
             ["amixer", "-c", card, "sset", "Right Input Mixer Boost", "on"],
