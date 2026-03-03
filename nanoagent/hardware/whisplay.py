@@ -339,7 +339,8 @@ class WhisplayDevice:
             self.stop_playback()
 
         card_index = self._find_card_index()
-        hw_device = f"hw:{card_index},0"
+        # Use plughw for automatic format conversion (sample rate, channels)
+        hw_device = f"plughw:{card_index},0"
 
         self._play_proc = subprocess.Popen(
             ["aplay", "-D", hw_device, str(audio_path)],
