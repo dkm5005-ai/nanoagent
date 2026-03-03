@@ -106,19 +106,24 @@ class Config(BaseModel):
     # Model definitions
     models: list[ModelConfig] = Field(default_factory=lambda: [
         ModelConfig(
-            name="claude",
-            provider="anthropic",
-            model="claude-sonnet-4-20250514",
+            name="gpt4-mini",
+            provider="openai",
+            model="gpt-4o-mini",
         ),
         ModelConfig(
             name="gpt4",
             provider="openai",
             model="gpt-4o",
         ),
+        ModelConfig(
+            name="claude",
+            provider="anthropic",
+            model="claude-sonnet-4-20250514",
+        ),
     ])
 
-    # Default model to use
-    default_model: str = "claude"
+    # Default model to use (gpt4-mini is fastest)
+    default_model: str = "gpt4-mini"
 
     # Subsystem configs
     voice: VoiceConfig = Field(default_factory=VoiceConfig)

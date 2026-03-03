@@ -45,7 +45,7 @@
     }
   ],
 
-  "default_model": "claude",
+  "default_model": "gpt4-mini",
 
   "voice": {
     "enabled": true,
