@@ -309,6 +309,9 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
+    # Suppress noisy asyncio event loop cleanup errors
+    logging.getLogger("asyncio").setLevel(logging.CRITICAL)
+
     # Load config
     try:
         config = load_config(args.config)
