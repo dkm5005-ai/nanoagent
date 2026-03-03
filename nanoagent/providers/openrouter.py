@@ -18,10 +18,13 @@ class OpenRouterProvider(LLMProvider):
     ):
         self.api_key = api_key
         self.api_base = api_base.rstrip("/")
-        self.client = httpx.AsyncClient(
+
+    def _get_client(self) -> httpx.AsyncClient:
+        """Create a fresh client for each request to avoid event loop issues"""
+        return httpx.AsyncClient(
             base_url=self.api_base,
             headers={
-                "Authorization": f"Bearer {api_key}",
+                "Authorization": f"Bearer {self.api_key}",
                 "HTTP-Referer": "https://github.com/nanoagent",
                 "X-Title": "NanoAgent",
             },
@@ -58,10 +61,14 @@ class OpenRouterProvider(LLMProvider):
         if tools:
             body["tools"] = [t.to_openai_format() for t in tools]
 
-        # Make request
-        response = await self.client.post("/chat/completions", json=body)
-        response.raise_for_status()
-        data = response.json()
+        # Make request with fresh client
+        client = self._get_client()
+        try:
+            response = await client.post("/chat/completions", json=body)
+            response.raise_for_status()
+            data = response.json()
+        finally:
+            await client.aclose()
 
         # Parse response
         return self._parse_response(data)
@@ -133,5 +140,5 @@ class OpenRouterProvider(LLMProvider):
         )
 
     async def close(self) -> None:
-        """Close the HTTP client"""
-        await self.client.aclose()
+        """Close any resources (no-op since clients are created per-request)"""
+        pass

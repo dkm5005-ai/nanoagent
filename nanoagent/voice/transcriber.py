@@ -28,9 +28,13 @@ class Transcriber:
             model: Whisper model to use (default: whisper-1)
             language: Optional language code (e.g., "en", "es", "ja")
         """
-        self.client = AsyncOpenAI(api_key=api_key)
+        self.api_key = api_key
         self.model = model
         self.language = language
+
+    def _get_client(self) -> AsyncOpenAI:
+        """Create a fresh client for each request to avoid event loop issues"""
+        return AsyncOpenAI(api_key=self.api_key)
 
     async def transcribe(
         self,
@@ -73,7 +77,8 @@ class Transcriber:
             if prompt:
                 kwargs["prompt"] = prompt
 
-            response = await self.client.audio.transcriptions.create(**kwargs)
+            client = self._get_client()
+            response = await client.audio.transcriptions.create(**kwargs)
 
         text = response.text.strip()
         logger.debug(f"Transcription result: {text[:100]}...")
@@ -116,7 +121,8 @@ class Transcriber:
             if prompt:
                 kwargs["prompt"] = prompt
 
-            response = await self.client.audio.transcriptions.create(**kwargs)
+            client = self._get_client()
+            response = await client.audio.transcriptions.create(**kwargs)
 
         return {
             "text": response.text,

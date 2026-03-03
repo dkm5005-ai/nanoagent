@@ -12,9 +12,14 @@ class OpenAIProvider(LLMProvider):
     """Provider for OpenAI GPT models"""
 
     def __init__(self, api_key: str, api_base: str | None = None):
-        self.client = AsyncOpenAI(
-            api_key=api_key,
-            base_url=api_base,
+        self.api_key = api_key
+        self.api_base = api_base
+
+    def _get_client(self) -> AsyncOpenAI:
+        """Create a fresh client for each request to avoid event loop issues"""
+        return AsyncOpenAI(
+            api_key=self.api_key,
+            base_url=self.api_base,
         )
 
     @property
@@ -48,7 +53,8 @@ class OpenAIProvider(LLMProvider):
             request_kwargs["tools"] = [t.to_openai_format() for t in tools]
 
         # Make request
-        response = await self.client.chat.completions.create(**request_kwargs)
+        client = self._get_client()
+        response = await client.chat.completions.create(**request_kwargs)
 
         # Parse response
         return self._parse_response(response)

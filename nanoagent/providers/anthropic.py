@@ -12,9 +12,14 @@ class AnthropicProvider(LLMProvider):
     """Provider for Anthropic Claude models"""
 
     def __init__(self, api_key: str, api_base: str | None = None):
-        self.client = AsyncAnthropic(
-            api_key=api_key,
-            base_url=api_base,
+        self.api_key = api_key
+        self.api_base = api_base
+
+    def _get_client(self) -> AsyncAnthropic:
+        """Create a fresh client for each request to avoid event loop issues"""
+        return AsyncAnthropic(
+            api_key=self.api_key,
+            base_url=self.api_base,
         )
 
     @property
@@ -58,7 +63,8 @@ class AnthropicProvider(LLMProvider):
             request_kwargs["tools"] = [t.to_anthropic_format() for t in tools]
 
         # Make request
-        response = await self.client.messages.create(**request_kwargs)
+        client = self._get_client()
+        response = await client.messages.create(**request_kwargs)
 
         # Parse response
         return self._parse_response(response)

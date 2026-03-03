@@ -38,7 +38,7 @@ class Synthesizer:
             voice: Voice to use (alloy, echo, fable, onyx, nova, shimmer)
             output_dir: Directory to save audio files (default: temp dir)
         """
-        self.client = AsyncOpenAI(api_key=api_key)
+        self.api_key = api_key
         self.model = model
         self.voice = voice
         self.output_dir = Path(output_dir) if output_dir else Path(tempfile.gettempdir())
@@ -52,6 +52,10 @@ class Synthesizer:
 
         # Ensure output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def _get_client(self) -> AsyncOpenAI:
+        """Create a fresh client for each request to avoid event loop issues"""
+        return AsyncOpenAI(api_key=self.api_key)
 
     async def synthesize(
         self,
@@ -92,7 +96,8 @@ class Synthesizer:
         output_path = self.output_dir / filename
 
         # Make API request
-        response = await self.client.audio.speech.create(
+        client = self._get_client()
+        response = await client.audio.speech.create(
             model=self.model,
             voice=voice,
             input=text,
@@ -133,7 +138,8 @@ class Synthesizer:
 
         logger.debug(f"Synthesizing to bytes ({len(text)} chars)")
 
-        response = await self.client.audio.speech.create(
+        client = self._get_client()
+        response = await client.audio.speech.create(
             model=self.model,
             voice=voice,
             input=text,
