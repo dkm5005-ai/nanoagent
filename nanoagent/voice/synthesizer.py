@@ -100,10 +100,8 @@ class Synthesizer:
             speed=speed,
         )
 
-        # Save to file
-        with open(output_path, "wb") as f:
-            async for chunk in response.iter_bytes():
-                f.write(chunk)
+        # Save to file - response.content contains the audio bytes
+        response.stream_to_file(output_path)
 
         logger.debug(f"Saved audio to: {output_path}")
 
@@ -143,12 +141,8 @@ class Synthesizer:
             speed=speed,
         )
 
-        # Collect all chunks
-        chunks = []
-        async for chunk in response.iter_bytes():
-            chunks.append(chunk)
-
-        return b"".join(chunks)
+        # Return audio bytes directly
+        return response.content
 
     def set_voice(self, voice: str) -> None:
         """Change the default voice"""
