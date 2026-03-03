@@ -190,7 +190,7 @@ class VoiceAssistant:
 
                 # Synthesize and play audio
                 if self.synthesizer:
-                    audio_path = await self.synthesizer.synthesize(response)
+                    audio_path = await self.synthesizer.synthesize(response, output_format="wav")
                     self.device.play_audio(audio_path, blocking=True)
 
             self._set_state(State.IDLE)
