@@ -100,7 +100,7 @@ class VoiceAssistant:
         self.device.on_button_press(self._on_button_press)
         self.device.on_button_release(self._on_button_release)
 
-    def _set_state(self, new_state: State) -> None:
+    def _set_state(self, new_state: State, update_display: bool = True) -> None:
         """Update state with LED and display feedback"""
         with self._lock:
             self.state = new_state
@@ -109,8 +109,9 @@ class VoiceAssistant:
 
         if new_state == State.IDLE:
             self.device.led_breathing(*hw.led_idle_color)
-            pixels = self.renderer.render_status("Ready", bg_color=(20, 20, 40))
-            self.device.draw_image(0, 0, 240, 280, pixels)
+            if update_display:
+                pixels = self.renderer.render_status("Ready", bg_color=(20, 20, 40))
+                self.device.draw_image(0, 0, 240, 280, pixels)
 
         elif new_state == State.LISTENING:
             self.device.set_led(*hw.led_listening_color)
@@ -193,7 +194,8 @@ class VoiceAssistant:
                     audio_path = await self.synthesizer.synthesize(response, output_format="wav")
                     self.device.play_audio(audio_path, blocking=True)
 
-            self._set_state(State.IDLE)
+            # Return to IDLE but keep conversation on screen
+            self._set_state(State.IDLE, update_display=False)
 
         except Exception as e:
             logger.error(f"Async processing error: {e}")
