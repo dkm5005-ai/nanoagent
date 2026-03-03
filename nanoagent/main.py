@@ -210,6 +210,9 @@ class VoiceAssistant:
         # Setup mixer
         self.device.setup_mixer()
 
+        # Set backlight brightness
+        self.device.set_backlight(self.config.hardware.backlight_brightness)
+
         # Set initial state
         self._set_state(State.IDLE)
 
